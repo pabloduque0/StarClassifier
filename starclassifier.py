@@ -8,12 +8,12 @@ class StarClassifier():
         self.testing_data = testing_data
         self.testing_labels = testing_labels
 
-    def train(self):
+    def train_and_test(self):
 
         # Parameters
         learning_rate = 0.00001
-        training_epochs = 5000
-        batch_size = 10
+        training_epochs = 2000
+        batch_size = 5
         display_step = 1
 
         # Network Parameters
@@ -46,8 +46,7 @@ class StarClassifier():
         logits = multilayer_perceptron(X)
 
         # Define loss and optimizer
-        loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
-            logits=logits, labels=Y))
+        loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=Y))
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         train_op = optimizer.minimize(loss_op)
         # Initializing the variables
@@ -65,10 +64,9 @@ class StarClassifier():
                     batch_x = self.training_data[i:i+batch_size]
                     batch_y = self.training_labels[i:i+batch_size]
                     # Run optimization op (backprop) and cost op (to get loss value)
-                    _, c = sess.run([train_op, loss_op], feed_dict={X: batch_x,
-                                                                    Y: batch_y})
+                    _, cost = sess.run([train_op, loss_op], feed_dict={X: batch_x, Y: batch_y})
                     # Compute average loss
-                    avg_cost += c / total_batch
+                    avg_cost += cost / total_batch
                 # Display logs per epoch step
                 if epoch % display_step == 0:
                     print("Epoch:", '%04d' % (epoch+1), "cost={:.9f}".format(avg_cost))

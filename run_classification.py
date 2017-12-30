@@ -10,4 +10,5 @@ if training is not None:
     training_data, training_labels = training
     testing_data, testing_labels = testing
     starclassifier = StarClassifier(training_data, training_labels, testing_data, testing_labels)
-    starclassifier.train()
+    starclassifier.train_and_test()
+    
