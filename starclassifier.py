@@ -1,4 +1,6 @@
 import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
 
 class StarClassifier():
 
@@ -11,10 +13,10 @@ class StarClassifier():
     def train_and_test(self):
 
         # Parameters
-        learning_rate = 0.00001
+        learning_rate = 0.0001
         training_epochs = 2000
         batch_size = 5
-        display_step = 1
+        display_step = 100
 
         # Network Parameters
         n_input = 100 # 
@@ -46,12 +48,14 @@ class StarClassifier():
         logits = multilayer_perceptron(X)
 
         # Define loss and optimizer
-        loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=Y))
+        error = tf.losses.mean_squared_error(logits, Y)
+        #mean_squared_error = np.sqrt(tf.losses.mean_squared_error(logits, Y))
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-        train_op = optimizer.minimize(loss_op)
+        train_op = optimizer.minimize(error)
         # Initializing the variables
         init = tf.global_variables_initializer()
 
+        ordered_costs = []
         with tf.Session() as sess:
             sess.run(init)
 
@@ -64,7 +68,8 @@ class StarClassifier():
                     batch_x = self.training_data[i:i+batch_size]
                     batch_y = self.training_labels[i:i+batch_size]
                     # Run optimization op (backprop) and cost op (to get loss value)
-                    _, cost = sess.run([train_op, loss_op], feed_dict={X: batch_x, Y: batch_y})
+                    _, cost = sess.run([train_op, error], feed_dict={X: batch_x, Y: batch_y})
+                    ordered_costs.append(cost)
                     # Compute average loss
                     avg_cost += cost / total_batch
                 # Display logs per epoch step
@@ -72,9 +77,22 @@ class StarClassifier():
                     print("Epoch:", '%04d' % (epoch+1), "cost={:.9f}".format(avg_cost))
             print("Optimization Finished!")
 
+            print(logits)
             # Test model
             pred = tf.nn.softmax(logits)  # Apply softmax to logits
+
             correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(Y, 1))
+
             # Calculate accuracy
             accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+
             print("Accuracy:", accuracy.eval({X: self.testing_data, Y: self.testing_labels}))
+
+        self.plot_costs(ordered_costs, training_epochs, total_batch)
+
+    def plot_costs(self, costs, training_epochs, total_batch):
+
+        plt.plot(np.arange(0, training_epochs*total_batch), costs)
+        plt.ylabel('Cost')
+        plt.xlabel('Epochs')
+
