@@ -14,8 +14,8 @@ class StarClassifier():
 
         # Parameters
         learning_rate = 0.0001
-        training_epochs = 2000
-        batch_size = 5
+        training_epochs = 6000
+        batch_size = 10
         display_step = 100
 
         # Network Parameters
@@ -40,7 +40,7 @@ class StarClassifier():
 
         # Create model
         def multilayer_perceptron(x):
-            layer_1 = tf.nn.tanh(tf.matmul(x, weights['h1']))
+            layer_1 = tf.nn.softmax(tf.matmul(x, weights['h1']))
             output_layer = tf.matmul(layer_1, weights['out'])
             return output_layer
 
@@ -48,7 +48,7 @@ class StarClassifier():
         logits = multilayer_perceptron(X)
 
         # Define loss and optimizer
-        error = tf.losses.mean_squared_error(logits, Y)
+        error = tf.losses.mean_squared_error(predictions=logits, labels=Y)
         #mean_squared_error = np.sqrt(tf.losses.mean_squared_error(logits, Y))
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         train_op = optimizer.minimize(error)
@@ -77,16 +77,13 @@ class StarClassifier():
                     print("Epoch:", '%04d' % (epoch+1), "cost={:.9f}".format(avg_cost))
             print("Optimization Finished!")
 
-            print(logits)
             # Test model
             pred = tf.nn.softmax(logits)  # Apply softmax to logits
-
-            correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(Y, 1))
+            correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y, 1))
 
             # Calculate accuracy
             accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-
-            print("Accuracy:", accuracy.eval({X: self.testing_data, Y: self.testing_labels}))
+            print("Accuracy:", accuracy.eval({X: self.training_data, Y: self.testing_labels}))
 
         self.plot_costs(ordered_costs, training_epochs, total_batch)
 
