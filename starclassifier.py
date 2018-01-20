@@ -14,7 +14,7 @@ class StarClassifier():
 
         # Parameters
         learning_rate = 0.0001
-        training_epochs = 2000
+        training_epochs = 3000
         batch_size = 10
         display_step = 100
 
@@ -28,10 +28,10 @@ class StarClassifier():
         X = tf.placeholder("float", [None, n_input])
         Y = tf.placeholder("float", [None, n_classes])
 
-        # Store layers weight & bias
+        # Store layers weight & bias stddev=0.1
         weights = {
-            'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
-            'out': tf.Variable(tf.random_normal([n_hidden_1, n_classes]))
+            'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev=0.1)),
+            'out': tf.Variable(tf.random_normal([n_hidden_1, n_classes], stddev=0.1))
         }
         biases = {
             'b1': tf.Variable(tf.random_normal([n_hidden_1])),
@@ -94,7 +94,11 @@ class StarClassifier():
 
     def plot_costs(self, costs, training_epochs, total_batch):
 
-        plt.plot(np.arange(0, training_epochs*total_batch), costs)
+        plt.plot(np.repeat(np.arange(0, training_epochs), total_batch), costs)
         plt.ylabel('Cost')
         plt.xlabel('Epochs')
+        #plt.savefig('training_costs_hiddenred__v1.png')
+        plt.show()
+
+        
 
